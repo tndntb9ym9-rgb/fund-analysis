@@ -1,0 +1,6 @@
+SPY grew fastest at 14.0% a year. AGG grew slowest at -0.4% a year.
+SPY had the best return for its risk, with a Sharpe ratio of 0.69.
+GLD had the biggest price swings, with 18.5% volatility.
+GLD had the deepest fall from a peak, at -28.3%.
+VT moved most like SPY (correlation 0.97), and GLD moved least like it (0.17).
+An equal mix of the funds had 10.7% volatility, against a 14.2% average for the funds on their own.

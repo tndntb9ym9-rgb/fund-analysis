@@ -111,6 +111,37 @@ def plot_correlation(returns, path):
     plt.close()
 
 
+def write_findings(summary, returns, path):
+    """Turn the results into short plain-English findings and save them."""
+    cagr = summary["Annualised return (CAGR)"]
+    volatility = summary["Annualised volatility"]
+    sharpe = summary["Sharpe ratio"]
+    max_drawdown = summary["Max drawdown"]
+
+    findings = [
+        f"{cagr.idxmax()} grew fastest at {cagr.max():.1%} a year. "
+        f"{cagr.idxmin()} grew slowest at {cagr.min():.1%} a year.",
+        f"{sharpe.idxmax()} had the best return for its risk, with a Sharpe ratio of {sharpe.max():.2f}.",
+        f"{volatility.idxmax()} had the biggest price swings, with {volatility.max():.1%} volatility.",
+        f"{max_drawdown.idxmin()} had the deepest fall from a peak, at {max_drawdown.min():.1%}.",
+    ]
+
+    if len(returns.columns) > 1:
+        first_fund = returns.columns[0]
+        corr = returns.corr()[first_fund].drop(first_fund)
+        equal_mix = returns.mean(axis=1)  # the same amount in each fund, reset every day
+        mix_volatility = equal_mix.std() * np.sqrt(TRADING_DAYS)
+        findings += [
+            f"{corr.idxmax()} moved most like {first_fund} (correlation {corr.max():.2f}), "
+            f"and {corr.idxmin()} moved least like it ({corr.min():.2f}).",
+            f"An equal mix of the funds had {mix_volatility:.1%} volatility, "
+            f"against a {volatility.mean():.1%} average for the funds on their own.",
+        ]
+
+    path.write_text("\n".join(findings) + "\n")
+    return findings
+
+
 def run(prices, output_dir=OUTPUT_DIR):
     output_dir.mkdir(exist_ok=True)
     summary, returns, drawdown = compute_metrics(prices)
@@ -121,6 +152,10 @@ def run(prices, output_dir=OUTPUT_DIR):
     plot_correlation(returns, output_dir / "correlation.png")
 
     print(summary.round(3).to_string())
+
+    print("\nKey findings")
+    for finding in write_findings(summary, returns, output_dir / "findings.txt"):
+        print(f"- {finding}")
     return summary
 
 
